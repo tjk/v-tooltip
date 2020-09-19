@@ -2,6 +2,8 @@ import Popper from 'popper.js';
 import { ResizeObserver } from 'vue-resize';
 
 function _typeof(obj) {
+  "@babel/helpers - typeof";
+
   if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
     _typeof = function (obj) {
       return typeof obj;
@@ -1199,10 +1201,11 @@ function equalArrays(array, other, bitmask, customizer, equalFunc, stack) {
   if (arrLength != othLength && !(isPartial && othLength > arrLength)) {
     return false;
   }
-  // Assume cyclic values are equal.
-  var stacked = stack.get(array);
-  if (stacked && stack.get(other)) {
-    return stacked == other;
+  // Check that cyclic values are equal.
+  var arrStacked = stack.get(array);
+  var othStacked = stack.get(other);
+  if (arrStacked && othStacked) {
+    return arrStacked == other && othStacked == array;
   }
   var index = -1,
       result = true,
@@ -2122,10 +2125,11 @@ function equalObjects(object, other, bitmask, customizer, equalFunc, stack) {
       return false;
     }
   }
-  // Assume cyclic values are equal.
-  var stacked = stack.get(object);
-  if (stacked && stack.get(other)) {
-    return stacked == other;
+  // Check that cyclic values are equal.
+  var objStacked = stack.get(object);
+  var othStacked = stack.get(other);
+  if (objStacked && othStacked) {
+    return objStacked == other && othStacked == object;
   }
   var result = true;
   stack.set(object, other);
@@ -2389,9 +2393,7 @@ var DEFAULT_OPTIONS = {
 };
 var openTooltips = [];
 
-var Tooltip =
-/*#__PURE__*/
-function () {
+var Tooltip = /*#__PURE__*/function () {
   /**
    * Create a new Tooltip.js instance
    * @class Tooltip
@@ -2458,7 +2460,7 @@ function () {
     });
 
     // apply user options over default ones
-    _options = _objectSpread2({}, DEFAULT_OPTIONS, {}, _options);
+    _options = _objectSpread2(_objectSpread2({}, DEFAULT_OPTIONS), _options);
     _reference.jquery && (_reference = _reference[0]);
     this.show = this.show.bind(this);
     this.hide = this.hide.bind(this); // cache reference and options
@@ -2766,11 +2768,11 @@ function () {
 
       this._append(tooltipNode, container);
 
-      var popperOptions = _objectSpread2({}, options.popperOptions, {
+      var popperOptions = _objectSpread2(_objectSpread2({}, options.popperOptions), {}, {
         placement: options.placement
       });
 
-      popperOptions.modifiers = _objectSpread2({}, popperOptions.modifiers, {
+      popperOptions.modifiers = _objectSpread2(_objectSpread2({}, popperOptions.modifiers), {}, {
         arrow: {
           element: this.options.arrowSelector
         }
@@ -3225,7 +3227,7 @@ function createTooltip(el, value) {
 
   var opts = _objectSpread2({
     title: content
-  }, getOptions(_objectSpread2({}, value, {
+  }, getOptions(_objectSpread2(_objectSpread2({}, value), {}, {
     placement: getPlacement(value, modifiers)
   })));
 
@@ -3267,7 +3269,7 @@ function bind(el, _ref) {
 
       tooltip.setContent(content); // Options
 
-      tooltip.setOptions(_objectSpread2({}, value, {
+      tooltip.setOptions(_objectSpread2(_objectSpread2({}, value), {}, {
         placement: getPlacement(value, modifiers)
       }));
     } else {
@@ -3283,9 +3285,9 @@ function bind(el, _ref) {
 }
 var directive = {
   options: defaultOptions,
-  bind: bind,
-  update: bind,
-  unbind: function unbind(el) {
+  beforeMount: bind,
+  updated: bind,
+  unmounted: function unmounted(el) {
     destroyTooltip(el);
   }
 };
@@ -3672,25 +3674,25 @@ var script = {
       }
 
       if (!this.popperInstance) {
-        var popperOptions = _objectSpread2({}, this.popperOptions, {
+        var popperOptions = _objectSpread2(_objectSpread2({}, this.popperOptions), {}, {
           placement: this.placement
         });
 
-        popperOptions.modifiers = _objectSpread2({}, popperOptions.modifiers, {
-          arrow: _objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.arrow, {
+        popperOptions.modifiers = _objectSpread2(_objectSpread2({}, popperOptions.modifiers), {}, {
+          arrow: _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.arrow), {}, {
             element: this.$refs.arrow
           })
         });
 
         if (this.offset) {
           var offset = this.$_getOffset();
-          popperOptions.modifiers.offset = _objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.offset, {
+          popperOptions.modifiers.offset = _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.offset), {}, {
             offset: offset
           });
         }
 
         if (this.boundariesElement) {
-          popperOptions.modifiers.preventOverflow = _objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.preventOverflow, {
+          popperOptions.modifiers.preventOverflow = _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.preventOverflow), {}, {
             boundariesElement: this.boundariesElement
           });
         }
@@ -4210,7 +4212,7 @@ var __vue_is_functional_template__ = false;
 
 /* style inject shadow dom */
 
-var __vue_component__ = normalizeComponent({
+var __vue_component__ = /*#__PURE__*/normalizeComponent({
   render: __vue_render__,
   staticRenderFns: __vue_staticRenderFns__
 }, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, undefined, undefined);
@@ -5158,8 +5160,8 @@ function styleInject(css, ref) {
   }
 }
 
-var css = ".resize-observer[data-v-b329ee4c]{position:absolute;top:0;left:0;z-index:-1;width:100%;height:100%;border:none;background-color:transparent;pointer-events:none;display:block;overflow:hidden;opacity:0}.resize-observer[data-v-b329ee4c] object{display:block;position:absolute;top:0;left:0;height:100%;width:100%;overflow:hidden;pointer-events:none;z-index:-1}";
-styleInject(css);
+var css_248z = ".resize-observer[data-v-b329ee4c]{position:absolute;top:0;left:0;z-index:-1;width:100%;height:100%;border:none;background-color:transparent;pointer-events:none;display:block;overflow:hidden;opacity:0}.resize-observer[data-v-b329ee4c] object{display:block;position:absolute;top:0;left:0;height:100%;width:100%;overflow:hidden;pointer-events:none;z-index:-1}";
+styleInject(css_248z);
 
 function install(Vue) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};

@@ -5,6 +5,8 @@
 }(this, (function (exports) { 'use strict';
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -91,7 +93,7 @@
 
   /**!
    * @fileOverview Kickass library to create and place poppers near their reference elements.
-   * @version 1.16.0
+   * @version 1.16.1
    * @license
    * Copyright (c) 2016 Federico Zivolo and contributors
    *
@@ -437,7 +439,7 @@
     var sideA = axis === 'x' ? 'Left' : 'Top';
     var sideB = sideA === 'Left' ? 'Right' : 'Bottom';
 
-    return parseFloat(styles['border' + sideA + 'Width'], 10) + parseFloat(styles['border' + sideB + 'Width'], 10);
+    return parseFloat(styles['border' + sideA + 'Width']) + parseFloat(styles['border' + sideB + 'Width']);
   }
 
   function getSize(axis, body, html, computedStyle) {
@@ -592,8 +594,8 @@
     var scrollParent = getScrollParent(children);
 
     var styles = getStyleComputedProperty(parent);
-    var borderTopWidth = parseFloat(styles.borderTopWidth, 10);
-    var borderLeftWidth = parseFloat(styles.borderLeftWidth, 10);
+    var borderTopWidth = parseFloat(styles.borderTopWidth);
+    var borderLeftWidth = parseFloat(styles.borderLeftWidth);
 
     // In cases where the parent is fixed, we must ignore negative scroll in offset calc
     if (fixedPosition && isHTML) {
@@ -614,8 +616,8 @@
     // differently when margins are applied to it. The margins are included in
     // the box of the documentElement, in the other cases not.
     if (!isIE10 && isHTML) {
-      var marginTop = parseFloat(styles.marginTop, 10);
-      var marginLeft = parseFloat(styles.marginLeft, 10);
+      var marginTop = parseFloat(styles.marginTop);
+      var marginLeft = parseFloat(styles.marginLeft);
 
       offsets.top -= borderTopWidth - marginTop;
       offsets.bottom -= borderTopWidth - marginTop;
@@ -1554,8 +1556,8 @@
     // Compute the sideValue using the updated popper offsets
     // take popper margin in account because we don't have this info available
     var css = getStyleComputedProperty(data.instance.popper);
-    var popperMarginSide = parseFloat(css['margin' + sideCapitalized], 10);
-    var popperBorderSide = parseFloat(css['border' + sideCapitalized + 'Width'], 10);
+    var popperMarginSide = parseFloat(css['margin' + sideCapitalized]);
+    var popperBorderSide = parseFloat(css['border' + sideCapitalized + 'Width']);
     var sideValue = center - data.offsets.popper[side] - popperMarginSide - popperBorderSide;
 
     // prevent arrowElement from being placed not contiguously to its popper
@@ -3816,10 +3818,11 @@
     if (arrLength != othLength && !(isPartial && othLength > arrLength)) {
       return false;
     }
-    // Assume cyclic values are equal.
-    var stacked = stack.get(array);
-    if (stacked && stack.get(other)) {
-      return stacked == other;
+    // Check that cyclic values are equal.
+    var arrStacked = stack.get(array);
+    var othStacked = stack.get(other);
+    if (arrStacked && othStacked) {
+      return arrStacked == other && othStacked == array;
     }
     var index = -1,
         result = true,
@@ -4739,10 +4742,11 @@
         return false;
       }
     }
-    // Assume cyclic values are equal.
-    var stacked = stack.get(object);
-    if (stacked && stack.get(other)) {
-      return stacked == other;
+    // Check that cyclic values are equal.
+    var objStacked = stack.get(object);
+    var othStacked = stack.get(other);
+    if (objStacked && othStacked) {
+      return objStacked == other && othStacked == object;
     }
     var result = true;
     stack.set(object, other);
@@ -5006,9 +5010,7 @@
   };
   var openTooltips = [];
 
-  var Tooltip =
-  /*#__PURE__*/
-  function () {
+  var Tooltip = /*#__PURE__*/function () {
     /**
      * Create a new Tooltip.js instance
      * @class Tooltip
@@ -5075,7 +5077,7 @@
       });
 
       // apply user options over default ones
-      _options = _objectSpread2({}, DEFAULT_OPTIONS, {}, _options);
+      _options = _objectSpread2(_objectSpread2({}, DEFAULT_OPTIONS), _options);
       _reference.jquery && (_reference = _reference[0]);
       this.show = this.show.bind(this);
       this.hide = this.hide.bind(this); // cache reference and options
@@ -5383,11 +5385,11 @@
 
         this._append(tooltipNode, container);
 
-        var popperOptions = _objectSpread2({}, options.popperOptions, {
+        var popperOptions = _objectSpread2(_objectSpread2({}, options.popperOptions), {}, {
           placement: options.placement
         });
 
-        popperOptions.modifiers = _objectSpread2({}, popperOptions.modifiers, {
+        popperOptions.modifiers = _objectSpread2(_objectSpread2({}, popperOptions.modifiers), {}, {
           arrow: {
             element: this.options.arrowSelector
           }
@@ -5842,7 +5844,7 @@
 
     var opts = _objectSpread2({
       title: content
-    }, getOptions(_objectSpread2({}, value, {
+    }, getOptions(_objectSpread2(_objectSpread2({}, value), {}, {
       placement: getPlacement(value, modifiers)
     })));
 
@@ -5884,7 +5886,7 @@
 
         tooltip.setContent(content); // Options
 
-        tooltip.setOptions(_objectSpread2({}, value, {
+        tooltip.setOptions(_objectSpread2(_objectSpread2({}, value), {}, {
           placement: getPlacement(value, modifiers)
         }));
       } else {
@@ -5900,9 +5902,9 @@
   }
   var directive = {
     options: defaultOptions,
-    bind: bind,
-    update: bind,
-    unbind: function unbind(el) {
+    beforeMount: bind,
+    updated: bind,
+    unmounted: function unmounted(el) {
       destroyTooltip(el);
     }
   };
@@ -6402,25 +6404,25 @@
         }
 
         if (!this.popperInstance) {
-          var popperOptions = _objectSpread2({}, this.popperOptions, {
+          var popperOptions = _objectSpread2(_objectSpread2({}, this.popperOptions), {}, {
             placement: this.placement
           });
 
-          popperOptions.modifiers = _objectSpread2({}, popperOptions.modifiers, {
-            arrow: _objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.arrow, {
+          popperOptions.modifiers = _objectSpread2(_objectSpread2({}, popperOptions.modifiers), {}, {
+            arrow: _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.arrow), {}, {
               element: this.$refs.arrow
             })
           });
 
           if (this.offset) {
             var offset = this.$_getOffset();
-            popperOptions.modifiers.offset = _objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.offset, {
+            popperOptions.modifiers.offset = _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.offset), {}, {
               offset: offset
             });
           }
 
           if (this.boundariesElement) {
-            popperOptions.modifiers.preventOverflow = _objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.preventOverflow, {
+            popperOptions.modifiers.preventOverflow = _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.preventOverflow), {}, {
               boundariesElement: this.boundariesElement
             });
           }
@@ -6940,7 +6942,7 @@
 
   /* style inject shadow dom */
 
-  var __vue_component__ = normalizeComponent({
+  var __vue_component__ = /*#__PURE__*/normalizeComponent({
     render: __vue_render__,
     staticRenderFns: __vue_staticRenderFns__
   }, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, undefined, undefined);
@@ -7888,8 +7890,8 @@
     }
   }
 
-  var css = ".resize-observer[data-v-b329ee4c]{position:absolute;top:0;left:0;z-index:-1;width:100%;height:100%;border:none;background-color:transparent;pointer-events:none;display:block;overflow:hidden;opacity:0}.resize-observer[data-v-b329ee4c] object{display:block;position:absolute;top:0;left:0;height:100%;width:100%;overflow:hidden;pointer-events:none;z-index:-1}";
-  styleInject(css);
+  var css_248z = ".resize-observer[data-v-b329ee4c]{position:absolute;top:0;left:0;z-index:-1;width:100%;height:100%;border:none;background-color:transparent;pointer-events:none;display:block;overflow:hidden;opacity:0}.resize-observer[data-v-b329ee4c] object{display:block;position:absolute;top:0;left:0;height:100%;width:100%;overflow:hidden;pointer-events:none;z-index:-1}";
+  styleInject(css_248z);
 
   function install$1(Vue) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
