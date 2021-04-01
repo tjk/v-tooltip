@@ -264,7 +264,7 @@ export default {
     this.hide()
   },
 
-  beforeDestroy () {
+  beforeUnmount () {
     this.dispose()
   },
 

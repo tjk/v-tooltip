@@ -6314,7 +6314,7 @@
     deactivated: function deactivated() {
       this.hide();
     },
-    beforeDestroy: function beforeDestroy() {
+    beforeUnmount: function beforeUnmount() {
       this.dispose();
     },
     methods: {
