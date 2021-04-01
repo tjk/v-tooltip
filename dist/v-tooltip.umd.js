@@ -6853,8 +6853,38 @@
   function toRaw(observed) {
       return ((observed && toRaw(observed["__v_raw" /* RAW */])) || observed);
   }
+
+  const convert = (val) => isObject$1(val) ? reactive(val) : val;
   function isRef(r) {
       return Boolean(r && r.__v_isRef === true);
+  }
+  function ref(value) {
+      return createRef(value);
+  }
+  class RefImpl {
+      constructor(_rawValue, _shallow = false) {
+          this._rawValue = _rawValue;
+          this._shallow = _shallow;
+          this.__v_isRef = true;
+          this._value = _shallow ? _rawValue : convert(_rawValue);
+      }
+      get value() {
+          track(toRaw(this), "get" /* GET */, 'value');
+          return this._value;
+      }
+      set value(newVal) {
+          if (hasChanged(toRaw(newVal), this._rawValue)) {
+              this._rawValue = newVal;
+              this._value = this._shallow ? newVal : convert(newVal);
+              trigger(toRaw(this), "set" /* SET */, 'value', newVal);
+          }
+      }
+  }
+  function createRef(rawValue, shallow = false) {
+      if (isRef(rawValue)) {
+          return rawValue;
+      }
+      return new RefImpl(rawValue, shallow);
   }
 
   const stack = [];
@@ -9388,6 +9418,13 @@
         }
       }
     },
+    setup: function setup() {
+      return {
+        refArrow: ref(null),
+        refPopover: ref(null),
+        refTrigger: ref(null)
+      };
+    },
     data: function data() {
       return {
         isOpen: false,
@@ -9421,8 +9458,8 @@
       },
       container: function container(val) {
         if (this.isOpen && this.popperInstance) {
-          var popoverNode = this.$refs.popover;
-          var reference = this.$refs.trigger;
+          var popoverNode = this.refPopover;
+          var reference = this.refTrigger;
           var container = this.$_findContainer(this.container, reference);
 
           if (!container) {
@@ -9459,7 +9496,7 @@
       this.$_preventOpen = false;
     },
     mounted: function mounted() {
-      var popoverNode = this.$refs.popover;
+      var popoverNode = this.refPopover;
       popoverNode.parentNode && popoverNode.parentNode.removeChild(popoverNode);
       this.$_init();
 
@@ -9514,7 +9551,7 @@
           this.popperInstance.destroy(); // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
 
           if (!this.popperInstance.options.removeOnDestroy) {
-            var popoverNode = this.$refs.popover;
+            var popoverNode = this.refPopover;
             popoverNode.parentNode && popoverNode.parentNode.removeChild(popoverNode);
           }
         }
@@ -9532,8 +9569,8 @@
       $_show: function $_show() {
         var _this3 = this;
 
-        var reference = this.$refs.trigger;
-        var popoverNode = this.$refs.popover;
+        var reference = this.refTrigger;
+        var popoverNode = this.refPopover;
         clearTimeout(this.$_disposeTimer); // Already open
 
         if (this.isOpen) {
@@ -9566,7 +9603,7 @@
 
           popperOptions.modifiers = _objectSpread2(_objectSpread2({}, popperOptions.modifiers), {}, {
             arrow: _objectSpread2(_objectSpread2({}, popperOptions.modifiers && popperOptions.modifiers.arrow), {}, {
-              element: this.$refs.arrow
+              element: this.refArrow
             })
           });
 
@@ -9662,7 +9699,7 @@
 
         if (disposeTime !== null) {
           this.$_disposeTimer = setTimeout(function () {
-            var popoverNode = _this4.$refs.popover;
+            var popoverNode = _this4.refPopover;
 
             if (popoverNode) {
               // Don't remove popper instance, just the HTML element
@@ -9699,7 +9736,7 @@
       $_addEventListeners: function $_addEventListeners() {
         var _this5 = this;
 
-        var reference = this.$refs.trigger;
+        var reference = this.refTrigger;
         var directEvents = [];
         var oppositeEvents = [];
         var events = typeof this.trigger === 'string' ? this.trigger.split(' ').filter(function (trigger) {
@@ -9814,8 +9851,8 @@
       $_setTooltipNodeEvent: function $_setTooltipNodeEvent(event) {
         var _this7 = this;
 
-        var reference = this.$refs.trigger;
-        var popoverNode = this.$refs.popover;
+        var reference = this.refTrigger;
+        var popoverNode = this.refPopover;
         var relatedreference = event.relatedreference || event.toElement || event.relatedTarget;
 
         var callback = function callback(event2) {
@@ -9840,7 +9877,7 @@
         return false;
       },
       $_removeEventListeners: function $_removeEventListeners() {
-        var reference = this.$refs.trigger;
+        var reference = this.refTrigger;
         this.$_events.forEach(function (_ref4) {
           var func = _ref4.func,
               event = _ref4.event;
@@ -9925,8 +9962,8 @@
     var _loop = function _loop(i) {
       var popover = openPopovers[i];
 
-      if (popover.$refs.popover) {
-        var contains = popover.$refs.popover.contains(event.target);
+      if (popover.refPopover) {
+        var contains = popover.refPopover.contains(event.target);
         requestAnimationFrame(function () {
           if (event.closeAllPopover || event.closePopover && contains || popover.autoHide && !contains) {
             popover.$_handleGlobalClose(event, touch);
@@ -9947,7 +9984,7 @@
     return openBlock(), createBlock("div", {
       class: ["v-popover", $options.cssClass]
     }, [createVNode("div", {
-      ref: "trigger",
+      ref: "refTrigger",
       class: "trigger",
       style: {
         "display": "inline-block"
@@ -9957,7 +9994,7 @@
     }, [renderSlot(_ctx.$slots, "default")], 8
     /* PROPS */
     , ["aria-describedby", "tabindex"]), createVNode("div", {
-      ref: "popover",
+      ref: "refPopover",
       id: $options.popoverId,
       class: [$props.popoverBaseClass, $props.popoverClass, $options.cssClass],
       style: {
@@ -9971,7 +10008,6 @@
     }, [createVNode("div", {
       class: $props.popoverWrapperClass
     }, [createVNode("div", {
-      ref: "inner",
       class: $props.popoverInnerClass,
       style: {
         "position": "relative"
@@ -9984,7 +10020,7 @@
     , ["onNotify"])) : createCommentVNode("v-if", true)], 2
     /* CLASS */
     ), createVNode("div", {
-      ref: "arrow",
+      ref: "refArrow",
       class: $props.popoverArrowClass
     }, null, 2
     /* CLASS */

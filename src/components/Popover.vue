@@ -4,7 +4,7 @@
     :class="cssClass"
   >
     <div
-      ref="trigger"
+      ref="refTrigger"
       class="trigger"
       style="display: inline-block;"
       :aria-describedby="popoverId"
@@ -14,7 +14,7 @@
     </div>
 
     <div
-      ref="popover"
+      ref="refPopover"
       :id="popoverId"
       :class="[popoverBaseClass, popoverClass, cssClass]"
       :style="{
@@ -26,7 +26,6 @@
     >
       <div :class="popoverWrapperClass">
         <div
-          ref="inner"
           :class="popoverInnerClass"
           style="position: relative;"
         >
@@ -36,13 +35,14 @@
 
           <ResizeObserver v-if="handleResize" @notify="$_handleResize" />
         </div>
-        <div ref="arrow" :class="popoverArrowClass"></div>
+        <div ref="refArrow" :class="popoverArrowClass"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
 import { directive } from '../directives/v-tooltip'
 import Popper from 'popper.js'
 import { ResizeObserver } from 'vue-resize'
@@ -167,6 +167,14 @@ export default {
     },
   },
 
+  setup () {
+    return {
+      refArrow: ref(null),
+      refPopover: ref(null),
+      refTrigger: ref(null),
+    }
+  },
+
   data () {
     return {
       isOpen: false,
@@ -207,8 +215,8 @@ export default {
 
     container (val) {
       if (this.isOpen && this.popperInstance) {
-        const popoverNode = this.$refs.popover
-        const reference = this.$refs.trigger
+        const popoverNode = this.refPopover
+        const reference = this.refTrigger
 
         const container = this.$_findContainer(this.container, reference)
         if (!container) {
@@ -250,7 +258,7 @@ export default {
   },
 
   mounted () {
-    const popoverNode = this.$refs.popover
+    const popoverNode = this.refPopover
     popoverNode.parentNode && popoverNode.parentNode.removeChild(popoverNode)
 
     this.$_init()
@@ -297,7 +305,7 @@ export default {
 
         // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
         if (!this.popperInstance.options.removeOnDestroy) {
-          const popoverNode = this.$refs.popover
+          const popoverNode = this.refPopover
           popoverNode.parentNode && popoverNode.parentNode.removeChild(popoverNode)
         }
       }
@@ -315,8 +323,8 @@ export default {
     },
 
     $_show () {
-      const reference = this.$refs.trigger
-      const popoverNode = this.$refs.popover
+      const reference = this.refTrigger
+      const popoverNode = this.refPopover
 
       clearTimeout(this.$_disposeTimer)
 
@@ -352,7 +360,7 @@ export default {
           ...popperOptions.modifiers,
           arrow: {
             ...popperOptions.modifiers && popperOptions.modifiers.arrow,
-            element: this.$refs.arrow,
+            element: this.refArrow,
           },
         }
 
@@ -442,7 +450,7 @@ export default {
       const disposeTime = directive.options.popover.disposeTimeout || directive.options.disposeTimeout
       if (disposeTime !== null) {
         this.$_disposeTimer = setTimeout(() => {
-          const popoverNode = this.$refs.popover
+          const popoverNode = this.refPopover
           if (popoverNode) {
             // Don't remove popper instance, just the HTML element
             popoverNode.parentNode && popoverNode.parentNode.removeChild(popoverNode)
@@ -478,7 +486,7 @@ export default {
     },
 
     $_addEventListeners () {
-      const reference = this.$refs.trigger
+      const reference = this.refTrigger
       const directEvents = []
       const oppositeEvents = []
 
@@ -576,8 +584,8 @@ export default {
     },
 
     $_setTooltipNodeEvent (event) {
-      const reference = this.$refs.trigger
-      const popoverNode = this.$refs.popover
+      const reference = this.refTrigger
+      const popoverNode = this.refPopover
 
       const relatedreference = event.relatedreference || event.toElement || event.relatedTarget
 
@@ -604,7 +612,7 @@ export default {
     },
 
     $_removeEventListeners () {
-      const reference = this.$refs.trigger
+      const reference = this.refTrigger
       this.$_events.forEach(({ func, event }) => {
         reference.removeEventListener(event, func)
       })
@@ -681,8 +689,8 @@ function handleGlobalClose (event, touch = false) {
   // Delay so that close directive has time to set values
   for (let i = 0; i < openPopovers.length; i++) {
     let popover = openPopovers[i]
-    if (popover.$refs.popover) {
-      const contains = popover.$refs.popover.contains(event.target)
+    if (popover.refPopover) {
+      const contains = popover.refPopover.contains(event.target)
       requestAnimationFrame(() => {
         if (event.closeAllPopover || (event.closePopover && contains) || (popover.autoHide && !contains)) {
           popover.$_handleGlobalClose(event, touch)
