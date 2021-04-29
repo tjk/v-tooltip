@@ -7,9 +7,6 @@ import 'vue-resize/dist/vue-resize.css'
 export { createTooltip, destroyTooltip } from './directives/v-tooltip'
 
 export function install (Vue, options = {}) {
-  if (install.installed) return
-  install.installed = true
-
   const finalOptions = {}
   merge(finalOptions, defaultOptions, options)
 
