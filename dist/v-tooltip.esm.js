@@ -5069,8 +5069,6 @@ styleInject(css_248z);
 
 function install(Vue) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  if (install.installed) return;
-  install.installed = true;
   var finalOptions = {};
   merge_1(finalOptions, defaultOptions, options);
   plugin.options = finalOptions;
